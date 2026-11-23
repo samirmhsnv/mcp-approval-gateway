@@ -1,5 +1,5 @@
 import { type Logger, silentLogger } from "../log.js";
-import { formatArgs, truncate } from "./format.js";
+import { formatArgs } from "./format.js";
 import type { ApprovalDecision, ApprovalRequest, Approver, UnauthorizedAttempt } from "./types.js";
 
 // ---------------------------------------------------------------------------------------------
