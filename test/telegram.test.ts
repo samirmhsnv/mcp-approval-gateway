@@ -217,3 +217,15 @@ describe("BotApiClient", () => {
     );
   });
 });
+
+describe("renderRequest", () => {
+  it("stays within Telegram's 4096 character limit for huge inputs", async () => {
+    const { renderRequest } = await import("../src/approvers/telegram.js");
+    const huge = "<>&".repeat(5_000);
+    const text = renderRequest(request({ preview: huge, reason: huge }));
+    expect(text.length).toBeLessThan(4_096 - 200);
+    expect(text).toContain("(truncated)");
+    const noPreview = renderRequest(request({ preview: undefined, args: { blob: huge } }));
+    expect(noPreview.length).toBeLessThan(4_096 - 200);
+  });
+});

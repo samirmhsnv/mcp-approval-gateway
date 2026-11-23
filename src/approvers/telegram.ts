@@ -350,24 +350,31 @@ export function escapeHtml(text: string): string {
 export function renderRequest(req: ApprovalRequest): string {
   const minutes = Math.max(1, Math.round((req.expiresAt.getTime() - Date.now()) / 60_000));
   const header = [
-    `🛡 <b>Approval required</b>: <code>${escapeHtml(req.tool)}</code>`,
-    `<b>Reason:</b> ${escapeHtml(truncate(req.reason, 500))}`,
+    `<b>Approval required</b>: <code>${escapeHtml(req.tool)}</code>`,
+    `<b>Reason:</b> ${fitEscaped(req.reason, 600)}`,
   ];
   const footer = [
     `Expires in ~${minutes} min, then auto-rejects. ID <code>${escapeHtml(req.id.slice(0, 8))}</code>`,
     "<i>Reply to this message to reject with a reason.</i>",
   ];
-  // Reserve room for the outcome line appended on edit.
-  const budget = TELEGRAM_LIMIT - 300 - header.join("\n").length - footer.join("\n").length;
-  const previewBudget = req.preview ? Math.floor(budget * 0.6) : 0;
-  const body: string[] = [];
-  if (req.preview) body.push(`<pre>${escapeHtml(truncate(req.preview, previewBudget))}</pre>`);
-  const argsBudget = budget - (body[0]?.length ?? 0) - 40;
-  body.push(
-    "<b>Arguments</b>",
-    `<pre>${escapeHtml(formatArgs(req.args, Math.max(200, argsBudget)))}</pre>`,
-  );
-  return [...header, "", ...body, "", ...footer].join("\n");
+  // Leave room for the tags below and for the outcome line appended when the request is decided.
+  const budget = TELEGRAM_LIMIT - 400 - header.join("\n").length - footer.join("\n").length;
+  // The preview is the exact action (e.g. the SQL), so it replaces the raw argument dump.
+  const body = req.preview
+    ? `<pre>${fitEscaped(req.preview, budget)}</pre>`
+    : `<b>Arguments</b>\n<pre>${fitEscaped(formatArgs(req.args, budget), budget)}</pre>`;
+  return [...header, "", body, "", ...footer].join("\n");
+}
+
+/** HTML-escape `text`, truncating it so the *escaped* result fits in `budget` characters. */
+function fitEscaped(text: string, budget: number): string {
+  let raw = text;
+  let escaped = escapeHtml(raw);
+  while (escaped.length > budget && raw.length > 0) {
+    raw = raw.slice(0, Math.floor(raw.length * 0.9));
+    escaped = escapeHtml(raw);
+  }
+  return escaped.length < escapeHtml(text).length ? `${escaped}\n… (truncated)` : escaped;
 }
 
 function describeUser(user: TgUser): string {

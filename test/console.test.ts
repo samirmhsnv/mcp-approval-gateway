@@ -59,3 +59,18 @@ describe("ConsoleApprover", () => {
     await approver.stop();
   });
 });
+
+describe("ConsoleApprover without a terminal", () => {
+  it("fails with a clear error instead of crashing when /dev/tty is unavailable", async () => {
+    // In CI (and here) there is usually no controlling terminal. If there is one, skip.
+    const { openSync, closeSync } = await import("node:fs");
+    try {
+      closeSync(openSync("/dev/tty", "r+"));
+      return;
+    } catch {
+      // expected in non-interactive environments
+    }
+    const approver = new ConsoleApprover();
+    await expect(approver.start()).rejects.toThrow(/needs an interactive terminal/);
+  });
+});

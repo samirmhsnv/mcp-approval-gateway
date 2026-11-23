@@ -20,8 +20,9 @@ export function formatRequestPlain(req: ApprovalRequest): string {
     `reason:  ${req.reason}`,
     `expires: ${req.expiresAt.toISOString()}`,
   ];
+  // The preview is the exact action (e.g. the SQL), so it replaces the raw argument dump.
   if (req.preview) lines.push("", req.preview);
-  lines.push("", "arguments:", formatArgs(req.args));
+  else lines.push("", "arguments:", formatArgs(req.args));
   lines.push("────────────────────────────────────────────────────");
   return lines.join("\n");
 }

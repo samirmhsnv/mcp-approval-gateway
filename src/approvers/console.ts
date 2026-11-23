@@ -1,4 +1,4 @@
-import { createReadStream, createWriteStream } from "node:fs";
+import { closeSync, createReadStream, createWriteStream, openSync } from "node:fs";
 import { createInterface, type Interface } from "node:readline/promises";
 import type { Readable, Writable } from "node:stream";
 import { formatRequestPlain } from "./format.js";
@@ -29,17 +29,38 @@ export class ConsoleApprover implements Approver {
   private rl: Interface | undefined;
   private output: Writable | undefined;
   private queue: Promise<unknown> = Promise.resolve();
+  private ttyFd: number | undefined;
 
   constructor(options: ConsoleApproverOptions = {}) {
     this.options = options;
   }
 
+  /** Fail fast at startup if there is no terminal to ask on. */
+  async start(): Promise<void> {
+    this.ensureInterface();
+  }
+
   private ensureInterface(): Interface {
-    if (!this.rl) {
-      const input = this.options.input ?? createReadStream("/dev/tty");
-      this.output = this.options.output ?? createWriteStream("/dev/tty");
-      this.rl = createInterface({ input, output: this.output, terminal: false });
+    if (this.rl) return this.rl;
+    let { input, output } = this.options;
+    if (!input || !output) {
+      let fd: number;
+      try {
+        fd = openSync("/dev/tty", "r+");
+      } catch (err) {
+        throw new Error(
+          `the console approver needs an interactive terminal (/dev/tty): ${(err as Error).message}`,
+        );
+      }
+      this.ttyFd = fd;
+      input ??= createReadStream("/dev/tty", { fd, autoClose: false });
+      output ??= createWriteStream("/dev/tty", { fd, autoClose: false });
     }
+    // A broken terminal must never crash the MCP server; pending questions just fail.
+    input.on("error", () => this.rl?.close());
+    output.on("error", () => this.rl?.close());
+    this.output = output;
+    this.rl = createInterface({ input, output, terminal: false });
     return this.rl;
   }
 
@@ -72,6 +93,10 @@ export class ConsoleApprover implements Approver {
   async stop(): Promise<void> {
     this.rl?.close();
     this.rl = undefined;
+    if (this.ttyFd !== undefined) {
+      closeSync(this.ttyFd);
+      this.ttyFd = undefined;
+    }
   }
 }
 
