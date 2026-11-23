@@ -1,0 +1,17 @@
+# Demo database for mcp-approval-gateway. Local use only: the passwords below are not secrets.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: demo
+      POSTGRES_USER: owner
+      POSTGRES_PASSWORD: owner
+    ports:
+      - "54329:5432"
+    volumes:
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U owner -d demo"]
+      interval: 2s
+      timeout: 3s
+      retries: 20

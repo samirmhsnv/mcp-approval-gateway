@@ -40,7 +40,10 @@
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "vitest run",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "schema": "node scripts/gen-schema.mjs",
+    "demo": "node examples/demo-client.mjs",
+    "check": "pnpm typecheck && pnpm lint && pnpm test"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
@@ -53,5 +56,10 @@
     "@types/pg": "^8.23.1",
     "typescript": "~5.9.3",
     "vitest": "^5.1.1"
+  },
+  "packageManager": "pnpm@10.17.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samirmhsnv/mcp-approval-gateway.git"
   }
 }

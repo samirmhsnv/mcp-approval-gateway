@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "tools": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "enum": [
+          "read",
+          "write",
+          "disabled"
+        ]
+      }
+    },
+    "approval": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "approver": {
+          "default": "telegram",
+          "type": "string",
+          "enum": [
+            "telegram",
+            "console"
+          ]
+        },
+        "timeoutSeconds": {
+          "default": 300,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 86400
+        }
+      },
+      "additionalProperties": false
+    },
+    "telegram": {
+      "type": "object",
+      "properties": {
+        "botTokenEnv": {
+          "default": "TELEGRAM_BOT_TOKEN",
+          "type": "string",
+          "minLength": 1
+        },
+        "approverIds": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "chatIds": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "apiBaseUrl": {
+          "default": "https://api.telegram.org",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "approverIds"
+      ],
+      "additionalProperties": false
+    },
+    "postgres": {
+      "type": "object",
+      "properties": {
+        "readUrlEnv": {
+          "default": "DATABASE_URL",
+          "type": "string",
+          "minLength": 1
+        },
+        "writeUrlEnv": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statementTimeoutMs": {
+          "default": 5000,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxRows": {
+          "default": 200,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxAffectedRows": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false
+    },
+    "audit": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "path": {
+          "default": "./audit.jsonl",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "title": "mcp-approval-gateway config"
+}

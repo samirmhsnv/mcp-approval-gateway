@@ -1,0 +1,26 @@
+{
+  "$schema": "../gateway.config.schema.json",
+  "tools": {
+    "db_query": "read",
+    "db_list_tables": "read",
+    "db_execute": "write"
+  },
+  "approval": {
+    "approver": "telegram",
+    "timeoutSeconds": 300
+  },
+  "telegram": {
+    "botTokenEnv": "TELEGRAM_BOT_TOKEN",
+    "approverIds": [123456789]
+  },
+  "postgres": {
+    "readUrlEnv": "DATABASE_URL",
+    "writeUrlEnv": "DATABASE_WRITE_URL",
+    "statementTimeoutMs": 5000,
+    "maxRows": 200,
+    "maxAffectedRows": 50
+  },
+  "audit": {
+    "path": "./audit.jsonl"
+  }
+}

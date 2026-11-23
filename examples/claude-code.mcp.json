@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "approval-gateway": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/absolute/path/to/mcp-approval-gateway/dist/index.js",
+        "--config",
+        "/absolute/path/to/mcp-approval-gateway/examples/gateway.config.json"
+      ],
+      "env": {
+        "DATABASE_URL": "postgres://gateway_reader:reader@localhost:54329/demo",
+        "DATABASE_WRITE_URL": "postgres://gateway_writer:writer@localhost:54329/demo",
+        "TELEGRAM_BOT_TOKEN": "${TELEGRAM_BOT_TOKEN}"
+      }
+    }
+  }
+}

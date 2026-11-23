@@ -1,0 +1,16 @@
+{
+  "$schema": "../gateway.config.schema.json",
+  "approval": {
+    "approver": "console",
+    "timeoutSeconds": 120
+  },
+  "postgres": {
+    "readUrlEnv": "DATABASE_URL",
+    "writeUrlEnv": "DATABASE_WRITE_URL",
+    "maxRows": 50,
+    "maxAffectedRows": 10
+  },
+  "audit": {
+    "path": "./audit.jsonl"
+  }
+}
